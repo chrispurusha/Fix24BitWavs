@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# Script for allowing 24 bit files to play on Pioneer DJ decks.
+#
+# Copyright (C) 2024 Chris Turner <chris_purusha@icloud.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# 
+
+d="/Volumes/ext-ssd2"
+
+save_IFS="${IFS}"
+IFS=$'\n'
+
+process_file () {
+   flags=$(xxd -s20 -l2 -ps $1);
+   if ((flags==feff)); then
+    echo $1;
+    printf '\x01\x00' | dd of=$1 bs=1 seek=20 count=2 conv=notrunc
+   fi
+}
+
+for f in $(find "${d}" -name '*.wav')
+do
+   file_size=$(stat -f%z ${f})
+   if ((file_size > 32)); then
+      process_file $f
+   fi
+done
+
+IFS="${save_IFS}"
