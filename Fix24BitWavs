@@ -35,7 +35,7 @@ for f in $(find "${d}" -name '*.wav')
 do
    file_size=$(stat -f%z ${f})
    if ((file_size > 32)); then
-      process_file $f
+      process_file "${f}"
    fi
 done
 
